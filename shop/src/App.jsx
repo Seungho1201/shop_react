@@ -6,21 +6,31 @@ import bg from './img/bg.jpg'
 
 import data from './data.js'
 import Detail from './routes/Detail.jsx'
+import axios from 'axios'
 
-import { Button, Container,Nav,Navbar, NavDropdown, Col } from 'react-bootstrap';
+import { Button, Container,Nav,Navbar, NavDropdown, Col, Offcanvas } from 'react-bootstrap';
 import { Routes, Route, Link, useNavigate, Outlet } from "react-router-dom"
+
+
 
 function App() {
 
+  let[num,setNum] = useState(0);
+
   let[shoes] = useState(data);
+  let[page,pageSet] = useState(false);
+
+  let[data2, data2Set] = useState();
+
+
   let navigate = useNavigate();
 
   return (
     <div className='App'>
       
 
-      {/* 메인 배경 이미지 */} 
-      <Navbar expand="lg" className="bg-body-tertiary" data-bs-theme="dark">
+    {/* Navbar */} 
+    <Navbar expand="lg" className="bg-body-tertiary" data-bs-theme="dark">
       <Container>
         <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -29,16 +39,17 @@ function App() {
           <Nav className="me-auto">
 
             <Nav.Link onClick={()=>{ navigate('/') }}>Main</Nav.Link>
-            <Nav.Link onClick={()=>{ navigate('/detail') }}>Detail</Nav.Link>
+            <Nav.Link onClick={()=>{ navigate('/detail/0') }}>Detail</Nav.Link>
             <Nav.Link onClick={()=>{ navigate(-1) }}>Back</Nav.Link>
+
             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
 
-              <NavDropdown.Item href="#action/3.1"> 메뉴 1</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2"> 메뉴 2</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3"> 메뉴 3</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.1"> 메뉴 1</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.2"> 메뉴 2</NavDropdown.Item>
+            <NavDropdown.Item href="#action/3.3"> 메뉴 3</NavDropdown.Item>
 
-              <NavDropdown.Divider />
-                <NavDropdown.Item href="#action/3.4"> Separated link</NavDropdown.Item>
+            <NavDropdown.Divider />
+              <NavDropdown.Item href="#action/3.4"> Separated link</NavDropdown.Item>
             </NavDropdown>
 
           </Nav>
@@ -49,31 +60,42 @@ function App() {
     {/* 메인 배경 이미지 */} 
     <div className='main-bg' style={{backgroundImage : 'url('+ bg +')'}}></div>
 
+
     {/* 라우트로 페이지 나누기기 */} 
     <Routes>
       {/* 상품 페이지들  */}
       <Route path='/' element={
         <>
-          
           <div className="container">
             <div className="row">
               {
                 shoes.map(function(a, i) {
-                  return(
-                      <Card shoes={shoes} i = {i}></Card>
-                    )
-                  })
-                }
+                  return(<Card shoes={shoes} i = {i}></Card>)
+                })
+              }
               </div>
             </div>
+
+            <button onClick={()=>{
+              axios.get('https://codingapple1.github.io/shop/data2.json')
+              .then((moreData)=>{ data2Set(moreData)
+                console.log(data2.data);
+              })
+              .catch(()=>{ console.log("실패"); });
+
+             pageSet(!page);
+            }}> 버튼</button>
+
+            {
+                page == true ? <MoreItem data2={data2.data} /> : null
+            }
+
           </>
         }
       />
 
       {/* 상세 페이지  */}
-      <Route path='/detail' element={
-        <Detail></Detail>
-      }/>
+      <Route path='/detail/:id' element={<Detail data={data} />}></Route>
 
       {/* about  */}
       <Route path='/about' element={ <About/> }>
@@ -86,10 +108,22 @@ function App() {
 
     </Routes>
 
-
     </div>
   );
 }
+
+
+function MoreItem(props){
+  return(
+    <div>
+      <h1>111</h1>
+      <p>{ props.data2[0].title }</p>
+      <p>{ props.data2[0].price }</p>
+      <p>{ props.data2[0].content }</p>
+    </div>
+  )
+}
+
 
 function Card(props){
   return(
@@ -104,12 +138,13 @@ function Card(props){
 function About(){
   return(
     <>
-    <div> 회사 정보임</div>
-    {/* nested route를 어디에 보여줄건지는 Outlet */}
-    <Outlet/>
+      <div> 회사 정보임</div>
+      {/* nested route를 어디에 보여줄건지는 Outlet */}
+      <Outlet/>
     </>
   )
 }
+
 
 
 
